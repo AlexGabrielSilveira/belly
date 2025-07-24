@@ -3,12 +3,13 @@ import { ConfigModule } from '@nestjs/config';
 import { NecordModule } from 'necord';
 import { BotModule } from './bot/bot.module';
 import { AppUpdate } from './app.update';
+import { config } from './config/config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }), 
     NecordModule.forRoot({
-      token: process.env.DISCORD_TOKEN!,
+      token: config.bot.token!,
       intents: ['Guilds', 'GuildMessages', 'DirectMessages'],
     }),
     BotModule,
