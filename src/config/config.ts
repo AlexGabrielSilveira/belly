@@ -7,5 +7,11 @@ export const config = {
   },
   b3api: {
     url: 'https://b3api.vercel.app/api',
+  },
+  brapi_v1: {
+    url: 'https://brapi.dev/api',
+  },
+  brapi_v2: {
+    url: 'https://brapi.dev/api/v2',
   }
 }

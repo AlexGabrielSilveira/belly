@@ -1,18 +1,19 @@
-import { Context, Options, SlashCommand, SlashCommandContext, StringOption } from 'necord';
+import { Context, Options, SlashCommand, SlashCommandContext } from 'necord';
 import { Injectable } from '@nestjs/common';
 import { StocksDto } from '../dtos/stocks-command.dto';
-import { BotService } from '../services/bot.service';
+import { StocksService } from '../services/stocks.service';
 @Injectable()
 export class StocksCommand {
-  constructor(private readonly botService: BotService) {}
+  constructor(private readonly botService: StocksService) {}
   @SlashCommand({
     name: 'stock',
     description: 'Buscas informações sobre Ativos da B3!',
   })
   
-  async onSeachFii(@Context() [interaction]: SlashCommandContext, @Options() { options } : StocksDto) {
+  async onSearchStocks(@Context() [interaction]: SlashCommandContext, @Options() { options } : StocksDto) {
     await interaction.deferReply();
-    let stocks = await this.botService.getStocks(options);
-    await interaction.editReply({embeds: [stocks]});
+    let {embed, file} = await this.botService.getStocks(options);
+    
+    await interaction.editReply({embeds: [embed], files: file ? [file] : []});
   }
 }

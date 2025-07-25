@@ -1,20 +1,28 @@
 import { Injectable } from "@nestjs/common";
-import axios, { AxiosResponse } from "axios";
-import { EmbedBuilder } from "discord.js";
+import axios from "axios";
+import { AttachmentBuilder, EmbedBuilder } from "discord.js";
 import { config } from "src/config/config";
-import { AssetInterface as StockInterface } from "../interfaces/asset-interface";
+import { SvgToPngService } from "./svgToPng.service";
 
 @Injectable()
-export class BotService {
-   async getStocks(code: string) {
+export class StocksService {
+    constructor(private readonly svgToPngService: SvgToPngService) {}
+   async getStocks(code: string): Promise<{ embed: EmbedBuilder, file?: AttachmentBuilder }> {
 
     const stockCode = code.toUpperCase();
     try {
         const stock = await axios.get(`${config.b3api.url}/Assets/${stockCode}`);
+        
+        const file = await this.svgToPngService.convert(
+            `https://icons.brapi.dev/icons/${stockCode}.svg`,
+            stockCode
+        );
+        
 
         const embed = new EmbedBuilder()
-        .setTitle(`📊 Asset Info: ${stock.data.ticker}`)
+        .setTitle(`${stock.data.ticker}`)
         .setColor(0xdea22e)
+        .setThumbnail(`attachment://${stockCode}.png`)
         .addFields(
             { name: '💰 Price', value: `R$ ${stock.data.price.toFixed(2)}`, inline: true },
             { 
@@ -73,14 +81,15 @@ export class BotService {
             inline: false 
             }
         )
-        .setFooter({ text: 'Dados fornecidos pela B3API' })
-        return embed
+
+        return{ embed, file }
     } catch (error) {
+        console.error(`Erro ao buscar informações para o código ${stockCode}:`, error);
         const embed = new EmbedBuilder()
             .setColor('Red')
             .setTitle('Erro ao buscar informações')
             .setDescription(`Não foi possível encontrar informações para o código: \n${stockCode} \n evite usar caracteres especiais ou espaços.`);
-        return embed;
+        return { embed };
     }
     
    }
